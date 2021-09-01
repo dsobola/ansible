@@ -5,7 +5,7 @@
   become: true
   become_user: root
   tasks:
-    - name: Install apache httpd
+    - name: Install nginx
       apt:
-        name: apache2
+        name: nginx
         state: present
