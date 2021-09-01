@@ -1,0 +1,12 @@
+---
+- name: Install Packages
+  hosts: clients
+  gather_facts: no
+  become: true
+  become_user: root
+  become_method: su
+  tasks:
+    - name: Install apache httpd
+      apt:
+        name: apache2
+        state: present
