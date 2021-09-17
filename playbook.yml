@@ -55,6 +55,7 @@
         virtual_network_name: "{{hubNetworkName}}"
         resource_group: "{{resource_group}}"
         address_prefix_cidr: "{{azureFirewallSubnetPrefix}}"
+      register: output_subnet
 
     - name: Create subnet for VPN Gateway
       azure_rm_subnet:
@@ -79,7 +80,7 @@
         location: "{{location}}"
         ip_configurations:
           - name: Azure Firewall IP address configuration
-            subnet: "{{azureFirewallSubnetName}}"
+            subnet: "{{output_subnet.state.id}}"
             public_ip_address_name: "{{azureFirewallPublicIPName}}"
 
     - name: Force tunnel from spoke to firewall route table
