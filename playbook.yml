@@ -49,7 +49,7 @@
 
     - name: Create subnet for AzureFirewall
       azure_rm_subnet:
-        name: "{{AzureFirewallSubnet}}"
+        name: "{{azureFirewallSubnetName}}"
         virtual_network: "{{hubNetworkName}}"
         resource_group: "{{resource_group}}"
         address_prefix_cidr: "{{azureFirewallSubnetPrefix}}"
