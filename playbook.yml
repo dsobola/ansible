@@ -103,7 +103,7 @@
         resource_group: "{{resource_group}}"
         route_table_name: "{{azureFirewallRouteName}}"
         next_hop_type: virtual_appliance
-        next_hop_ip_address: "{{output_firewall.id}}"
+        next_hop_ip_address: "{{output_firewall.firewalls.ip_configurations[0].properties.privateIPAddress}}"
         address_prefix: 0.0.0.0/0
 
     - name: Network security group + rules for spoke network
