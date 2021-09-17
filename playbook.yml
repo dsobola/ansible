@@ -138,7 +138,7 @@
 
     - name: Spoke virtual subnet configuration
       azure_rm_subnet:
-        name: "{{spokeNetworkSubnetNam}}"
+        name: "{{spokeNetworkSubnetName}}"
         virtual_network_name: "{{spokeNetworkName}}"
         resource_group: "{{resource_group}}"
         address_prefix_cidr: "{{spokeNetworkSubnetPrefix}}"
