@@ -72,6 +72,7 @@
         domain_name_label: "{{azureFirewallDomainName}}"
         location: "{{location}}"
         sku: Standard
+      register: output_public_ip
 
     - name: Create and set up Azure Firewall
       azure_rm_azurefirewall:
@@ -81,7 +82,7 @@
         ip_configurations:
           - name: Azure Firewall IP address configuration
             subnet: "{{output_subnet.state.id}}"
-            public_ip_address_name: "{{azureFirewallPublicIPName}}"
+            public_ip_address: "{{output_public_ip.state.ip_address}}"
 
     - name: Force tunnel from spoke to firewall route table
       azure_rm_routetable:
