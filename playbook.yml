@@ -18,11 +18,13 @@
     vpnGatewaySubnetPrefix: 10.0.2.0/27
     vpnGatewayPublicIPName: vgw-pip
     bastionHostName: AzureBastionHost
+    bastionDomainName: bastiondomainweb
     bastionPublicIPName: bastion-pip
     bastionSubnetName: AzureBastionSubnet
     bastionNsgName: nsg-hub-bastion
     bastionSubnetPrefix: 10.0.1.0/29
     azureFirewallName: AzureFirewall
+    azureFirewallDomainName: azurefirewallweb
     azureFirewallPublicIPName: firewall-pip
     azureFirewallSubnetName: AzureFirewallSubnet
     azureFirewallSubnetPrefix: 10.0.3.0/26
@@ -66,7 +68,7 @@
         name: "{{azureFirewallPublicIPName}}"
         resource_group: "{{resource_group}}"
         allocation_method: Static
-        domain_name_label: "{{azureFirewallName}}"
+        domain_name_label: "{{azureFirewallDomainName}}"
         location: "{{location}}"
         sku: Standard
 
@@ -157,7 +159,7 @@
         name: "{{bastionPublicIPName}}"
         resource_group: "{{resource_group}}"
         allocation_method: Static
-        domain_name_label: "{{bastionHostName}}"
+        domain_name_label: "{{bastionDomainName}}"
         location: "{{location}}"
         sku: Standard
 
