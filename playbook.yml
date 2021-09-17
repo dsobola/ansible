@@ -6,13 +6,13 @@
     windowsVMCount: 1
     linuxVMCount: 1
     vmSize: Standard_A1_v2
-    hubNetworkName: vnet-hub
+    hubNetworkName: hub-net
     hubNetworkAddPrefix: 10.0.0.0/20
-    spokeNetworkName: vnet-spoke-one
+    spokeNetworkName: spoke-net
     spokeNetworkAddPrefix: 10.100.0.0/16
-    spokeNetworkSubnetName: snet-spoke-resources
+    spokeNetworkSubnetName: spoke-subnet
     spokeNetworkSubnetPrefix: 10.100.0.0/16
-    spokeNetworkNsgName: nsg-spoke-one-resources
+    spokeNetworkNsgName: spoke-nsg
     vpnGatewayName: vgw-gateway
     vpnGatewaySubnetName: GatewaySubnet
     vpnGatewaySubnetPrefix: 10.0.2.0/27
@@ -27,10 +27,10 @@
     azureFirewallSubnetName: AzureFirewallSubnet
     azureFirewallSubnetPrefix: 10.0.3.0/26
     azureFirewallRouteName: r-nexthop-to-fw
-    resource_group: ansible
+    resource_group: AZRG-MC-WEM-AUTMN
     location: canadacentral
-    peering-name-hub-to-spoke-one: hub-to-spoke-one
-    peering-name-spoke-to-hub-one: spoke-one-to-hub
+    peering-name-hub-to-spoke-one: hub-to-spoke
+    peering-name-spoke-to-hub-one: spoke-to-hub
     nicNameWindows: nic-windows-
     vmNameWindows: vm-windows-
     windowsOSVersion: 2016-Datacenter
