@@ -83,7 +83,6 @@
           - name: azureFirewallIpConfiguration
             subnet: "{{output_subnet.state.id}}"
             public_ip_address: "{{output_public_ip.state.name}}"
-      register: output_firewall
 
     - name: Force tunnel from spoke to firewall route table
       azure_rm_routetable:
@@ -91,6 +90,12 @@
         resource_group: "{{resource_group}}"
         location: "{{location}}"
         disable_bgp_route_propagation: False
+
+    - name: Get azure firewall info
+      azure_rm_azurefirewall_info:
+        name: "{{azureFirewallName}}"
+        resource_group: "{{resource_group}}"
+      register: output_firewall
 
     - name: Force tunnel from spoke to firewall route
       azure_rm_route:
