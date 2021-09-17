@@ -80,7 +80,7 @@
         resource_group: "{{resource_group}}"
         location: "{{location}}"
         ip_configurations:
-          - name: Azure Firewall IP address configuration
+          - name: azureFirewallIpConfiguration
             subnet: "{{output_subnet.state.id}}"
             public_ip_address: "{{output_public_ip.state.name}}"
 
