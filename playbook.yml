@@ -83,6 +83,7 @@
           - name: azureFirewallIpConfiguration
             subnet: "{{output_subnet.state.id}}"
             public_ip_address: "{{output_public_ip.state.name}}"
+      register: output_firewall
 
     - name: Force tunnel from spoke to firewall route table
       azure_rm_routetable:
@@ -97,6 +98,7 @@
         resource_group: "{{resource_group}}"
         route_table_name: "{{azureFirewallRouteName}}"
         next_hop_type: virtual_appliance
+        next_hop_ip_address: "{{output_firewall.state.id}}"
         address_prefix: 0.0.0.0/0
 
     - name: Network security group + rules for spoke network
