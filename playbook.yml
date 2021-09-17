@@ -82,7 +82,7 @@
         ip_configurations:
           - name: Azure Firewall IP address configuration
             subnet: "{{output_subnet.state.id}}"
-            public_ip_address: "{{output_public_ip.state.ip_address}}"
+            public_ip_address: "{{output_public_ip.state.name}}"
 
     - name: Force tunnel from spoke to firewall route table
       azure_rm_routetable:
