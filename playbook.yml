@@ -52,14 +52,14 @@
     - name: Create subnet for AzureFirewall
       azure_rm_subnet:
         name: "{{azureFirewallSubnetName}}"
-        virtual_network: "{{hubNetworkName}}"
+        virtual_network_name: "{{hubNetworkName}}"
         resource_group: "{{resource_group}}"
         address_prefix_cidr: "{{azureFirewallSubnetPrefix}}"
 
     - name: Create subnet for VPN Gateway
       azure_rm_subnet:
         name: "{{vpnGatewaySubnetName}}"
-        virtual_network: "{{hubNetworkName}}"
+        virtual_network_name: "{{hubNetworkName}}"
         resource_group: "{{resource_group}}"
         address_prefix_cidr: "{{vpnGatewaySubnetPrefix}}"
 
@@ -130,10 +130,10 @@
     - name: Spoke virtual subnet configuration
       azure_rm_subnet:
         name: "{{spokeNetworkSubnetNam}}"
-        virtual_network: "{{spokeNetworkName}}"
+        virtual_network_name: "{{spokeNetworkName}}"
         resource_group: "{{resource_group}}"
         address_prefix_cidr: "{{spokeNetworkSubnetPrefix}}"
-        security_group: "{{spokeNetworkNsgName}}"
+        security_group_name: "{{spokeNetworkNsgName}}"
         route_table: "{{azureFirewallRouteName}}"
 
     - name: Virtual network peering hub to spoke
@@ -240,10 +240,10 @@
     - name: Create subnet for BastionHost
       azure_rm_subnet:
         name: "{{bastionSubnetName}}"
-        virtual_network: "{{hubNetworkName}}"
+        virtual_network_name: "{{hubNetworkName}}"
         resource_group: "{{resource_group}}"
         address_prefix_cidr: "{{bastionSubnetPrefix}}"
-        security_group: "{{bastionNsgName}}"
+        security_group_name: "{{bastionNsgName}}"
 
     - name: Public IP address for VPN gateway
       azure_rm_publicipaddress:
