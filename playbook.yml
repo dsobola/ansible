@@ -1,0 +1,256 @@
+---
+- hosts: localhost
+  vars:
+    adminPassword: pass
+    adminUsername: admin
+    windowsVMCount: 1
+    linuxVMCount: 1
+    vmSize: Standard_A1_v2
+    hubNetworkName: vnet-hub
+    hubNetworkAddPrefix: 10.0.0.0/20
+    spokeNetworkName: vnet-spoke-one
+    spokeNetworkAddPrefix: 10.100.0.0/16
+    spokeNetworkSubnetName: snet-spoke-resources
+    spokeNetworkSubnetPrefix: 10.100.0.0/16
+    spokeNetworkNsgName: nsg-spoke-one-resources
+    vpnGatewayName: vgw-gateway
+    vpnGatewaySubnetName: GatewaySubnet
+    vpnGatewaySubnetPrefix: 10.0.2.0/27
+    vpnGatewayPublicIPName: vgw-pip
+    bastionHostName: AzureBastionHost
+    bastionPublicIPName: bastion-pip
+    bastionSubnetName: AzureBastionSubnet
+    bastionNsgName: nsg-hub-bastion
+    bastionSubnetPrefix: 10.0.1.0/29
+    azureFirewallName: AzureFirewall
+    azureFirewallPublicIPName: firewall-pip
+    azureFirewallSubnetName: AzureFirewallSubnet
+    azureFirewallSubnetPrefix: 10.0.3.0/26
+    azureFirewallRouteName: r-nexthop-to-fw
+    resource_group: ansible
+    location: canadacentral
+    peering-name-hub-to-spoke-one: hub-to-spoke-one
+    peering-name-spoke-to-hub-one: spoke-one-to-hub
+    nicNameWindows: nic-windows-
+    vmNameWindows: vm-windows-
+    windowsOSVersion: 2016-Datacenter
+    LinuxOSVersion: 16.04.0-LTS
+    nicNameLinux: nic-linux-
+    vmNameLinux: vm-linux-
+
+  tasks:
+    - name: Create HUB virtual network
+      azure_rm_virtualnetwork:
+        name: "{{hubNetworkName}}"
+        resource_group: "{{resource_group}}"
+        location: "{{location}}"
+        address_prefixes_cidr:
+          - "{{hubNetworkAddPrefix}}"
+
+    - name: Create subnet for AzureFirewall
+      azure_rm_subnet:
+        name: "{{AzureFirewallSubnet}}"
+        virtual_network: "{{hubNetworkName}}"
+        resource_group: "{{resource_group}}"
+        address_prefix_cidr: "{{azureFirewallSubnetPrefix}}"
+
+    - name: Create subnet for VPN Gateway
+      azure_rm_subnet:
+        name: "{{vpnGatewaySubnetName}}"
+        virtual_network: "{{hubNetworkName}}"
+        resource_group: "{{resource_group}}"
+        address_prefix_cidr: "{{vpnGatewaySubnetPrefix}}"
+
+    - name: Create a public IP address for Firewall
+      azure_rm_publicipaddress:
+        name: "{{azureFirewallPublicIPName}}"
+        resource_group: "{{resource_group}}"
+        allocation_method: Static
+        domain_name_label: "{{azureFirewallName}}"
+        location: "{{location}}"
+        sku: Standard
+
+    - name: Create and set up Azure Firewall
+      azure_rm_azurefirewall:
+        name: "{{azureFirewallName}}"
+        resource_group: "{{resource_group}}"
+        location: "{{location}}"
+        ip_configurations:
+          - name: Azure Firewall IP address configuration
+            subnet: "{{azureFirewallSubnetName}}"
+            public_ip_address_name: "{{azureFirewallPublicIPName}}"
+
+    - name: Force tunnel from spoke to firewall
+      azure_rm_routetable:
+        name: "{{azureFirewallRouteName}}"
+        resource_group: "{{resource_group}}"
+        location: "{{location}}"
+        disable_bgp_route_propagation: False
+      azure_rm_route:
+        name: "{{azureFirewallRouteName}}"
+        resource_group: "{{resource_group}}"
+        route_table_name: "{{azureFirewallRouteName}}"
+        next_hop_type: virtual_appliance
+        address_prefix: 0.0.0.0/0
+
+    - name: Network security group + rules for spoke network
+      azure_rm_securitygroup:
+        name: "{{spokeNetworkNsgName}}"
+        resource_group: "{{resource_group}}"
+        location: "{{location}}"
+        rules:
+          - name: bastion-in-vnet
+            protocol: Tcp
+            source_address_prefix: "{{bastionSubnetPrefix}}"
+            destination_port_range:
+              - 22
+              - 3389
+            access: Allow
+            priority: 100
+            direction: Inbound
+          
+          - name: DenyAllInBound
+            protocol: Tcp
+            access: Deny
+            priority: 1000
+            direction: Inbound
+
+    - name: Spoke virtual network and subnet configuration
+      azure_rm_virtualnetwork:
+        name: "{{spokeNetworkName}}"
+        location: "{{location}}"
+        resource_group: "{{resource_group}}"
+        address_prefixes_cidr:
+          - "{{spokeNetworkAddPrefix}}"
+
+      azure_rm_subnet:
+        name: "{{spokeNetworkSubnetNam}}"
+        virtual_network: "{{spokeNetworkName}}"
+        resource_group: "{{resource_group}}"
+        address_prefix_cidr: "{{spokeNetworkSubnetPrefix}}"
+        security_group: "{{spokeNetworkNsgName}}"
+        route_table: "{{azureFirewallRouteName}}"
+
+    - name: Virtual network peering hub to spoke
+      azure_rm_virtualnetworkpeering:
+        name: "{{peering-name-hub-to-spoke-one}}"
+        virtual_network: "{{hubNetworkName}}"
+        resource_group: "{{resource_group}}"
+        allow_forwarded_traffic: true
+        allow_virtual_network_access: true
+        remote_virtual_network: "{{spokeNetworkName}}"
+
+    - name: Virtual network peering spoke to hub
+      azure_rm_virtualnetworkpeering:
+        name: "{{peering-name-spoke-one-to-hub}}"
+        virtual_network: "{{spokeNetworkName}}"
+        resource_group: "{{resource_group}}"
+        allow_forwarded_traffic: true
+        allow_virtual_network_access: true
+        remote_virtual_network: "{{hubNetworkName}}"
+
+    - name: Public IP address for Bastion
+      azure_rm_publicipaddress:
+        name: "{{bastionPublicIPName}}"
+        resource_group: "{{resource_group}}"
+        allocation_method: Static
+        domain_name_label: "{{bastionHostName}}"
+        location: "{{location}}"
+        sku: Standard
+
+    - name: Network security group + rules for Bastion
+      azure_rm_securitygroup:
+        name: "{{bastionNsgName}}"
+        resource_group: "{{resource_group}}"
+        location: "{{location}}"
+        rules:
+          - name: bastion-in-allow
+            protocol: Tcp
+            source_address_prefix: "Internet"
+            destination_port_range:
+              - 443
+            access: Allow
+            priority: 100
+            direction: Inbound
+
+          - name: bastion-control-in-allow
+            protocol: Tcp
+            source_address_prefix: "GatewayManager"
+            destination_address_prefix: "*"
+            destination_port_range:
+              - 443
+            access: Allow
+            priority: 110
+            direction: Inbound
+
+          - name: bastion-in-host
+            protocol: "*"
+            source_address_prefix: "VirtualNetwork"
+            destination_address_prefix: "VirtualNetwork"
+            destination_port_range:
+              - 8080
+              - 5701
+            access: Allow
+            priority: 120
+            direction: Inbound
+
+          - name: bastion-vnet-out-allow
+            protocol: Tcp
+            source_address_prefix: "*"
+            destination_address_prefix: "VirtualNetwork"
+            destination_port_range:
+              - 22
+              - 3389
+            access: Allow
+            priority: 100
+            direction: Outbound
+
+          - name: bastion-azure-out-allow
+            protocol: Tcp
+            source_address_prefix: "*"
+            destination_address_prefix: "AzureCloud"
+            destination_port_range:
+              - 443
+            access: Allow
+            priority: 110
+            direction: Outbound
+
+          - name: bastion-out-host
+            protocol: Tcp
+            source_address_prefix: "VirtualNetwork"
+            destination_address_prefix: "VirtualNetwork"
+            destination_port_range:
+              - 8080
+              - 5701
+            access: Allow
+            priority: 120
+            direction: Outbound
+          
+          - name: bastion-out-deny
+            protocol: "*"
+            access: Deny
+            priority: 1000
+            direction: Outbound
+
+    - name: Create subnet for BastionHost
+      azure_rm_subnet:
+        name: "{{bastionSubnetName}}"
+        virtual_network: "{{hubNetworkName}}"
+        resource_group: "{{resource_group}}"
+        address_prefix_cidr: "{{bastionSubnetPrefix}}"
+        security_group: "{{bastionNsgName}}"
+
+    - name: Public IP address for VPN gateway
+      azure_rm_publicipaddress:
+        name: "{{bastionPublicIPName}}"
+        resource_group: "{{resource_group}}"
+        allocation_method: Static
+        domain_name_label: "{{bastionHostName}}"
+        location: "{{location}}"
+        sku: Standard
+        
+
+
+
+
+
