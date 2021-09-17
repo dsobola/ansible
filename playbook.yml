@@ -117,7 +117,7 @@
             priority: 1000
             direction: Inbound
 
-    - name: Spoke virtual network and subnet configuration
+    - name: Spoke virtual network configuration
       azure_rm_virtualnetwork:
         name: "{{spokeNetworkName}}"
         location: "{{location}}"
@@ -125,6 +125,7 @@
         address_prefixes_cidr:
           - "{{spokeNetworkAddPrefix}}"
 
+    - name: Spoke virtual subnet configuration
       azure_rm_subnet:
         name: "{{spokeNetworkSubnetNam}}"
         virtual_network: "{{spokeNetworkName}}"
