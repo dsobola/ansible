@@ -80,12 +80,14 @@
             subnet: "{{azureFirewallSubnetName}}"
             public_ip_address_name: "{{azureFirewallPublicIPName}}"
 
-    - name: Force tunnel from spoke to firewall
+    - name: Force tunnel from spoke to firewall route table
       azure_rm_routetable:
         name: "{{azureFirewallRouteName}}"
         resource_group: "{{resource_group}}"
         location: "{{location}}"
         disable_bgp_route_propagation: False
+
+    - name: Force tunnel from spoke to firewall route
       azure_rm_route:
         name: "{{azureFirewallRouteName}}"
         resource_group: "{{resource_group}}"
