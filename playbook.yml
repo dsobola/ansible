@@ -29,8 +29,8 @@
     azureFirewallRouteName: r-nexthop-to-fw
     resource_group: AZRG-MC-WEM-AUTMN
     location: canadacentral
-    peering-name-hub-to-spoke-one: hub-to-spoke
-    peering-name-spoke-to-hub-one: spoke-to-hub
+    peeringHubToSpoke: hub-to-spoke
+    peeringSpokeToHub: spoke-to-hub
     nicNameWindows: nic-windows-
     vmNameWindows: vm-windows-
     windowsOSVersion: 2016-Datacenter
@@ -133,7 +133,7 @@
 
     - name: Virtual network peering hub to spoke
       azure_rm_virtualnetworkpeering:
-        name: "{{peering-name-hub-to-spoke-one}}"
+        name: "{{peeringHubToSpoke}}"
         virtual_network: "{{hubNetworkName}}"
         resource_group: "{{resource_group}}"
         allow_forwarded_traffic: true
@@ -142,7 +142,7 @@
 
     - name: Virtual network peering spoke to hub
       azure_rm_virtualnetworkpeering:
-        name: "{{peering-name-spoke-one-to-hub}}"
+        name: "{{peeringSpokeToHub}}"
         virtual_network: "{{spokeNetworkName}}"
         resource_group: "{{resource_group}}"
         allow_forwarded_traffic: true
